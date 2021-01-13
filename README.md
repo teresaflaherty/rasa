@@ -1,3 +1,14 @@
+# Modified Rasa Open Source Engine for Emotional Capability
+
+This version of the Rasa Open Source engine has been modified to include emotional capability. 
+
+See below list for changes to the repository:
+- Syntax update for emotional capability
+- Integration with Twinword API for user Sentiment Analysis
+- Integration with Gabriel Denys' Emotional Emulator for enhanced emotional capability
+
+### Below is the original documentation for Rasa without emotional capability:
+
 # Rasa Open Source
 
 [![Join the chat on Rasa Community Forum](https://img.shields.io/badge/forum-join%20discussions-brightgreen.svg)](https://forum.rasa.com/?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
