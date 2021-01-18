@@ -43,3 +43,5 @@ def determine_bot_emotion(user_message, matrix_on):
 
     else:  # If integration with Gabriel's matrix is selected
         bot_emotion = sorted(user_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
+
+    return bot_emotion
