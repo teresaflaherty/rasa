@@ -8,16 +8,16 @@ def determine_bot_emotion(user_message, matrix_on):
         "content-type": "application/x-www-form-urlencoded",
         "x-rapidapi-key": "0263ca96c6msh75411dda7a319f6p163b4ejsn186017d93146",
         "x-rapidapi-host": "twinword-emotion-analysis-v1.p.rapidapi.com",
-        "useQueryString": True
+        "useQueryString": "True"
     }
 
-    response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers)
-    user_emotion_scores = response.emotion_scores
+    response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
+    print(response)
+    user_emotion_scores = response['emotion_scores']
 
     if matrix_on:  # If integration with Gabriel's matrix is selected
         provide_emotions_url = "https://gabeurl.com/emotions"
         provide_emotions_payload = user_emotion_scores
-        provide_emotions_headers = {}
 
         requests.post(provide_emotions_url, data=provide_emotions_payload, headers={})
 
@@ -41,7 +41,7 @@ def determine_bot_emotion(user_message, matrix_on):
 
         bot_emotion = sorted(bot_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
 
-    else:  # If integration with Gabriel's matrix is selected
+    else:  # If integration with Gabriel's matrix is not selected, uses input emotion as output emotion
         bot_emotion = sorted(user_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
 
     return bot_emotion

@@ -49,6 +49,7 @@ import rasa.shared.core.trackers
 from rasa.shared.core.trackers import DialogueStateTracker, EventVerbosity
 from rasa.shared.nlu.constants import INTENT_NAME_KEY
 from rasa.utils.endpoints import EndpointConfig
+from rasa.core.emotion_determination import determine_bot_emotion
 
 logger = logging.getLogger(__name__)
 
@@ -79,12 +80,13 @@ class MessageProcessor:
         self.action_endpoint = action_endpoint
 
     async def handle_message(
-        self, message: UserMessage
+        self, message: UserMessage, matrix
     ) -> Optional[List[Dict[Text, Any]]]:
         """Handle a single message with this processor."""
 
         # preprocess message if necessary
         tracker = await self.log_message(message, should_save_tracker=False)
+        emotion = determine_bot_emotion(message, matrix)
 
         if not self.policy_ensemble or not self.domain:
             # save tracker state to continue conversation from this state
