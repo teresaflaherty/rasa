@@ -6,7 +6,7 @@ def determine_bot_emotion(user_message, matrix_on):
     twinword_payload = f"text={user_message}"
     twinword_headers = {
         "content-type": "application/x-www-form-urlencoded",
-        "x-rapidapi-key": "0263ca96c6msh75411dda7a319f6p163b4ejsn186017d93146",
+        "x-rapidapi-key": "PUT_KEY_HERE",
         "x-rapidapi-host": "twinword-emotion-analysis-v1.p.rapidapi.com",
         "useQueryString": "True"
     }
