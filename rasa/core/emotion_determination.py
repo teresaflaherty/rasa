@@ -14,6 +14,8 @@ def determine_bot_emotion(user_message, matrix_on):
     response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
     print(response)
     user_emotion_scores = response['emotion_scores']
+    if len(user_emotion_scores) > 0:
+        user_emotion = response['emotions_detected'][0]
 
     if matrix_on:  # If integration with Gabriel's matrix is selected
         provide_emotions_url = "https://gabeurl.com/emotions"
@@ -42,6 +44,6 @@ def determine_bot_emotion(user_message, matrix_on):
         bot_emotion = sorted(bot_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
 
     else:  # If integration with Gabriel's matrix is not selected, uses input emotion as output emotion
-        bot_emotion = sorted(user_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
+        bot_emotion = user_emotion
 
-    return bot_emotion
+    return user_emotion, bot_emotion
