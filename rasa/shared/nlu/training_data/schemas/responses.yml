@@ -51,5 +51,7 @@ schema;responses:
               allowempty: True
           channel:
             type: "str"
+          emotion:
+            type: "str"
           metadata:
             type: "any"
