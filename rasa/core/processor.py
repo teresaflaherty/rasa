@@ -86,6 +86,8 @@ class MessageProcessor:
 
         # preprocess message if necessary
         tracker = await self.log_message(message, should_save_tracker=False)
+
+        # process bot and user emotions
         user_emotion, bot_emotion = determine_bot_emotion(message, matrix)
 
         if not self.policy_ensemble or not self.domain:
