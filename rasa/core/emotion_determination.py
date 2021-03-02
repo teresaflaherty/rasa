@@ -12,7 +12,6 @@ def determine_bot_emotion(user_message, matrix_on):
     }
 
     response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
-    print(response)
     user_emotion_scores = response['emotion_scores']
     if len(response['emotions_detected']) > 0:
         user_emotion = response['emotions_detected'][0]
