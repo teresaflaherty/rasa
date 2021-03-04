@@ -80,15 +80,12 @@ class MessageProcessor:
         self.action_endpoint = action_endpoint
 
     async def handle_message(
-        self, message: UserMessage, matrix: int
+        self, message: UserMessage
     ) -> Optional[List[Dict[Text, Any]]]:
         """Handle a single message with this processor."""
 
         # preprocess message if necessary
         tracker = await self.log_message(message, should_save_tracker=False)
-
-        # process bot and user emotions
-        user_emotion, bot_emotion = determine_bot_emotion(message, matrix)
 
         if not self.policy_ensemble or not self.domain:
             # save tracker state to continue conversation from this state
@@ -520,7 +517,7 @@ class MessageProcessor:
         )
 
     async def parse_message(
-        self, message: UserMessage, tracker: Optional[DialogueStateTracker] = None
+        self, message: UserMessage, matrix: int, tracker: Optional[DialogueStateTracker] = None
     ) -> Dict[Text, Any]:
         """Interprete the passed message using the NLU interpreter.
 
@@ -536,6 +533,9 @@ class MessageProcessor:
             text = self.message_preprocessor(message.text)
         else:
             text = message.text
+
+        # process bot and user emotions
+        user_emotion, bot_emotion = determine_bot_emotion(message, matrix)
 
         # for testing - you can short-cut the NLU part with a message
         # in the format /intent{"entity1": val1, "entity2": val2}

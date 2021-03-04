@@ -530,7 +530,7 @@ class Agent:
             matrix = 0
 
         async with self.lock_store.lock(message.sender_id):
-            return await processor.handle_message(message, matrix)
+            return await processor.handle_message(message)
 
     # noinspection PyUnusedLocal
     async def predict_next(
