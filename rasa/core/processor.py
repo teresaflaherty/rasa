@@ -80,12 +80,12 @@ class MessageProcessor:
         self.action_endpoint = action_endpoint
 
     async def handle_message(
-        self, message: UserMessage
+        self, message: UserMessage, emotional_matrix: bool,
     ) -> Optional[List[Dict[Text, Any]]]:
         """Handle a single message with this processor."""
 
         # preprocess message if necessary
-        tracker = await self.log_message(message, should_save_tracker=False)
+        tracker = await self.log_message(message, emotional_matrix, should_save_tracker=False)
 
         if not self.policy_ensemble or not self.domain:
             # save tracker state to continue conversation from this state
@@ -288,7 +288,7 @@ class MessageProcessor:
         return rasa.shared.core.trackers.get_trackers_for_conversation_sessions(tracker)
 
     async def log_message(
-        self, message: UserMessage, should_save_tracker: bool = True
+        self, message: UserMessage, emotional_matrix: bool, should_save_tracker: bool = True
     ) -> DialogueStateTracker:
         """Log `message` on tracker belonging to the message's conversation_id.
 
@@ -302,7 +302,7 @@ class MessageProcessor:
             message.sender_id, message.output_channel, message.metadata
         )
 
-        await self._handle_message_with_tracker(message, tracker)
+        await self._handle_message_with_tracker(message, emotional_matrix, tracker)
 
         if should_save_tracker:
             # save tracker state to continue conversation from this state
@@ -517,12 +517,13 @@ class MessageProcessor:
         )
 
     async def parse_message(
-        self, message: UserMessage, matrix: int, tracker: Optional[DialogueStateTracker] = None
+        self, message: UserMessage, emotional_matrix: bool, tracker: Optional[DialogueStateTracker] = None
     ) -> Dict[Text, Any]:
         """Interprete the passed message using the NLU interpreter.
 
         Arguments:
             message: Message to handle
+            emotional_matrix: Emotional matrix switch, will use Gabriel's Emotional Emulator if True
             tracker: Dialogue context of the message
 
         Returns:
@@ -535,7 +536,7 @@ class MessageProcessor:
             text = message.text
 
         # process bot and user emotions
-        user_emotion, bot_emotion = determine_bot_emotion(message, matrix)
+        user_emotion, bot_emotion = determine_bot_emotion(message, emotional_matrix)
 
         # for testing - you can short-cut the NLU part with a message
         # in the format /intent{"entity1": val1, "entity2": val2}
@@ -561,13 +562,13 @@ class MessageProcessor:
         return parse_data
 
     async def _handle_message_with_tracker(
-        self, message: UserMessage, tracker: DialogueStateTracker
+        self, message: UserMessage, emotional_matrix: bool, tracker: DialogueStateTracker
     ) -> None:
 
         if message.parse_data:
             parse_data = message.parse_data
         else:
-            parse_data = await self.parse_message(message, tracker)
+            parse_data = await self.parse_message(message, emotional_matrix, tracker)
 
         # don't ever directly mutate the tracker
         # - instead pass its events to log
