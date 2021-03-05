@@ -502,6 +502,8 @@ class Agent:
                     "intent_ranking": [{"name": "greet", "confidence": 1.0}],\
                     "entities": [{"entity": "name", "start": 6,\
                                   "end": 21, "value": "Rasa"}],\
+                    "user_emotion": ["sadness"],\
+                    "bot_emotion": ["sadness"]\
                 }
 
         """
