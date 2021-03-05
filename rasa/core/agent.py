@@ -585,6 +585,7 @@ class Agent:
     async def handle_text(
         self,
         text_message: Union[Text, Dict[Text, Any]],
+        emotional_matrix: bool,
         message_preprocessor: Optional[Callable[[Text], Text]] = None,
         output_channel: Optional[OutputChannel] = None,
         sender_id: Optional[Text] = DEFAULT_SENDER_ID,
@@ -615,7 +616,7 @@ class Agent:
 
         msg = UserMessage(text_message.get("text"), output_channel, sender_id)
 
-        return await self.handle_message(msg, message_preprocessor)
+        return await self.handle_message(msg, emotional_matrix, message_preprocessor)
 
     def toggle_memoization(self, activate: bool) -> None:
         """Toggles the memoization on and off.

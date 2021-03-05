@@ -17,6 +17,7 @@ def pprint(obj: Any):
 
 def chat(
     model_path: Optional[Text] = None,
+    emotional_matrix: bool = False,
     endpoints: Optional[Text] = None,
     agent: Optional["Agent"] = None,
     interpreter: Optional[NaturalLanguageInterpreter] = None,
@@ -25,6 +26,8 @@ def chat(
 
     Args:
         model_path: Path to a combined Rasa model.
+        emotional_matrix: Emotional matrix switch, will use Gabriel's Emotional Emulator
+                          if True (defaults to False)
         endpoints: Path to a yaml with the action server is custom actions are defined.
         agent: Rasa Core agent (used if no Rasa model given).
         interpreter: Rasa NLU interpreter (used with Rasa Core agent if no
@@ -56,7 +59,7 @@ def chat(
         if message == "/stop":
             break
 
-        responses = rasa.utils.common.run_in_loop(agent.handle_text(message))
+        responses = rasa.utils.common.run_in_loop(agent.handle_text(message, emotional_matrix))
         for response in responses:
             _display_bot_response(response)
 

@@ -73,7 +73,7 @@ def actions_since_last_utterance(tracker: DialogueStateTracker) -> List[Text]:
     return actions
 
 
-async def replay_events(tracker: DialogueStateTracker, agent: "Agent") -> None:
+async def replay_events(tracker: DialogueStateTracker, emotional_matrix: bool, agent: "Agent") -> None:
     """Take a tracker and replay the logged user utterances against an agent.
 
     During replaying of the user utterances, the executed actions and events
@@ -97,7 +97,7 @@ async def replay_events(tracker: DialogueStateTracker, agent: "Agent") -> None:
             rasa.shared.utils.cli.print_success(event.text)
             out = CollectingOutputChannel()
             await agent.handle_text(
-                event.text, sender_id=tracker.sender_id, output_channel=out
+                event.text, emotional_matrix, sender_id=tracker.sender_id, output_channel=out
             )
             for m in out.messages:
                 buttons = m.pop("buttons", None)  # for non-terminal stdin
