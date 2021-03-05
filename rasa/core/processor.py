@@ -97,7 +97,7 @@ class MessageProcessor:
             )
             return None
 
-        await self._predict_and_execute_next_action(message.output_channel, tracker)
+        await self._predict_and_execute_next_action(message.output_channel, emotional_matrix, tracker)
 
         # save tracker state to continue conversation from this state
         self._save_tracker(tracker)
@@ -536,7 +536,7 @@ class MessageProcessor:
             text = message.text
 
         # process bot and user emotions
-        user_emotion, bot_emotion = determine_bot_emotion(message, emotional_matrix)
+        user_emotion, bot_emotion = determine_bot_emotion(text, emotional_matrix)
 
         # for testing - you can short-cut the NLU part with a message
         # in the format /intent{"entity1": val1, "entity2": val2}
@@ -556,6 +556,9 @@ class MessageProcessor:
                 message.text, parse_data["intent"], parse_data["entities"]
             )
         )
+
+        parse_data["user_emotion"] = user_emotion
+        parse_data["bot_emotion"] = bot_emotion
 
         self._check_for_unseen_features(parse_data)
 
