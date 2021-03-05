@@ -524,11 +524,6 @@ class Agent:
 
         processor = self.create_processor(message_preprocessor)
 
-        if "matrix" in kwargs:
-            matrix = kwargs["matrix"]
-        else:
-            matrix = 0
-
         async with self.lock_store.lock(message.sender_id):
             return await processor.handle_message(message)
 
