@@ -20,17 +20,20 @@ class TemplatedNaturalLanguageGenerator(NaturalLanguageGenerator):
         self.templates = templates
 
     def _templates_for_utter_action(
-        self, utter_action: Text, output_channel: Text
+        self, utter_action: Text, bot_emotion: Text, output_channel: Text
     ) -> List[Dict[Text, Any]]:
         """Return array of templates that fit the channel and action."""
 
         channel_templates = []
+        emotional_templates = []
         default_templates = []
 
         for template in self.templates[utter_action]:
             if template.get("channel") == output_channel:
                 channel_templates.append(template)
-            elif not template.get("channel"):
+            elif template.get("emotion") == bot_emotion:
+                emotional_templates.append(template)
+            elif not template.get("channel") or not template.get("emotion"):
                 default_templates.append(template)
 
         # always prefer channel specific templates over default ones
@@ -41,18 +44,21 @@ class TemplatedNaturalLanguageGenerator(NaturalLanguageGenerator):
 
     # noinspection PyUnusedLocal
     def _random_template_for(
-        self, utter_action: Text, output_channel: Text
+        self, utter_action: Text, bot_emotion: Text, output_channel: Text
     ) -> Optional[Dict[Text, Any]]:
         """Select random template for the utter action from available ones.
 
         If channel-specific templates for the current output channel are given,
         only choose from channel-specific ones.
+
+        If emotion-specific templates for the bot's current emotional state, only
+        choose from emotion-specific ones.
         """
         import numpy as np
 
         if utter_action in self.templates:
             suitable_templates = self._templates_for_utter_action(
-                utter_action, output_channel
+                utter_action, bot_emotion, output_channel
             )
 
             if suitable_templates:
@@ -85,8 +91,13 @@ class TemplatedNaturalLanguageGenerator(NaturalLanguageGenerator):
     ) -> Optional[Dict[Text, Any]]:
         """Generate a response for the requested template."""
 
+        if "bot_emotion" in kwargs:
+            bot_emotion = kwargs["bot_emotion"]
+        else:
+            bot_emotion = "default"
+
         # Fetching a random template for the passed template name
-        r = copy.deepcopy(self._random_template_for(template_name, output_channel))
+        r = copy.deepcopy(self._random_template_for(template_name, bot_emotion, output_channel))
         # Filling the slots in the template and returning the template
         if r is not None:
             return self._fill_template(r, filled_slots, **kwargs)
