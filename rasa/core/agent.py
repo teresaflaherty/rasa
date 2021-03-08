@@ -477,7 +477,7 @@ class Agent:
         return self.tracker_store is not None and self.interpreter is not None
 
     async def parse_message_using_nlu_interpreter(
-        self, message_data: Text, emotional_matrix: bool, tracker: DialogueStateTracker = None
+        self, message_data: Text, tracker: DialogueStateTracker = None
     ) -> Dict[Text, Any]:
         """Handles message text and intent payload input messages.
 
@@ -510,12 +510,11 @@ class Agent:
 
         processor = self.create_processor()
         message = UserMessage(message_data)
-        return await processor.parse_message(message, emotional_matrix, tracker)
+        return await processor.parse_message(message, tracker)
 
     async def handle_message(
         self,
         message: UserMessage,
-        emotional_matrix: bool,
         message_preprocessor: Optional[Callable[[Text], Text]] = None,
         **kwargs,
     ) -> Optional[List[Dict[Text, Any]]]:
@@ -527,10 +526,15 @@ class Agent:
         if not self.is_ready():
             return noop(message)
 
+        if "emotional_matrix" in kwargs:
+            emotional_matrix = kwargs["emotional_matrix"]
+        else:
+            emotional_matrix = False
+
         processor = self.create_processor(message_preprocessor)
 
         async with self.lock_store.lock(message.sender_id):
-            return await processor.handle_message(message, emotional_matrix)
+            return await processor.handle_message(message)
 
     # noinspection PyUnusedLocal
     async def predict_next(

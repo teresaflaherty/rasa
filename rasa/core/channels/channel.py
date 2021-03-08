@@ -37,6 +37,7 @@ class UserMessage:
         text: Optional[Text] = None,
         output_channel: Optional["OutputChannel"] = None,
         sender_id: Optional[Text] = None,
+        emotional_matrix: bool = False,
         parse_data: Dict[Text, Any] = None,
         input_channel: Optional[Text] = None,
         message_id: Optional[Text] = None,
@@ -49,6 +50,7 @@ class UserMessage:
             output_channel: the output channel which should be used to send
                 bot responses back to the user.
             sender_id: the message owner ID.
+            emotional_matrix: switch for Gabriel Denys' emotional matrix, defaults to off.
             parse_data: rasa data about the message.
             input_channel: the name of the channel which received this message.
             message_id: ID of the message.
@@ -73,6 +75,8 @@ class UserMessage:
             self.sender_id = DEFAULT_SENDER_ID
 
         self.input_channel = input_channel
+
+        self.emotional_matrix = emotional_matrix
 
         self.parse_data = parse_data
         self.metadata = metadata
