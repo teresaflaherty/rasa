@@ -49,6 +49,7 @@ import rasa.shared.core.trackers
 from rasa.shared.core.trackers import DialogueStateTracker, EventVerbosity
 from rasa.shared.nlu.constants import INTENT_NAME_KEY
 from rasa.utils.endpoints import EndpointConfig
+from rasa.core.emotion_determination import determine_bot_emotion
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,7 @@ class MessageProcessor:
         self.action_endpoint = action_endpoint
 
     async def handle_message(
-        self, message: UserMessage
+        self, message: UserMessage,
     ) -> Optional[List[Dict[Text, Any]]]:
         """Handle a single message with this processor."""
 
@@ -522,6 +523,7 @@ class MessageProcessor:
 
         Arguments:
             message: Message to handle
+            emotional_matrix: Emotional matrix switch, will use Gabriel's Emotional Emulator if True
             tracker: Dialogue context of the message
 
         Returns:
@@ -532,6 +534,9 @@ class MessageProcessor:
             text = self.message_preprocessor(message.text)
         else:
             text = message.text
+
+        # process bot and user emotions
+        user_emotion, bot_emotion = determine_bot_emotion(text, message.emotional_matrix)
 
         # for testing - you can short-cut the NLU part with a message
         # in the format /intent{"entity1": val1, "entity2": val2}
@@ -551,6 +556,9 @@ class MessageProcessor:
                 message.text, parse_data["intent"], parse_data["entities"]
             )
         )
+
+        parse_data["user_emotion"] = user_emotion
+        parse_data["bot_emotion"] = bot_emotion
 
         self._check_for_unseen_features(parse_data)
 

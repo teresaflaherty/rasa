@@ -486,6 +486,8 @@ class Agent:
         Args:
             message_data (Text): Contain the received message in text or\
             intent payload format.
+            emotional_matrix (int): Emotional matrix switch, bot will use\
+             Gabriel's Emotional Emulator if True
             tracker (DialogueStateTracker): Contains the tracker to be\
             used by the interpreter.
 
@@ -500,6 +502,8 @@ class Agent:
                     "intent_ranking": [{"name": "greet", "confidence": 1.0}],\
                     "entities": [{"entity": "name", "start": 6,\
                                   "end": 21, "value": "Rasa"}],\
+                    "user_emotion": ["sadness"],\
+                    "bot_emotion": ["sadness"]\
                 }
 
         """
@@ -521,6 +525,11 @@ class Agent:
 
         if not self.is_ready():
             return noop(message)
+
+        if "emotional_matrix" in kwargs:
+            emotional_matrix = kwargs["emotional_matrix"]
+        else:
+            emotional_matrix = False
 
         processor = self.create_processor(message_preprocessor)
 
@@ -582,6 +591,7 @@ class Agent:
     async def handle_text(
         self,
         text_message: Union[Text, Dict[Text, Any]],
+        emotional_matrix: bool,
         message_preprocessor: Optional[Callable[[Text], Text]] = None,
         output_channel: Optional[OutputChannel] = None,
         sender_id: Optional[Text] = DEFAULT_SENDER_ID,
@@ -612,7 +622,7 @@ class Agent:
 
         msg = UserMessage(text_message.get("text"), output_channel, sender_id)
 
-        return await self.handle_message(msg, message_preprocessor)
+        return await self.handle_message(msg, emotional_matrix, message_preprocessor)
 
     def toggle_memoization(self, activate: bool) -> None:
         """Toggles the memoization on and off.

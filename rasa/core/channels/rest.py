@@ -55,6 +55,10 @@ class RestInput(InputChannel):
     def _extract_message(self, req: Request) -> Optional[Text]:
         return req.json.get("message", None)
 
+    # noinspection PyMethodMayBeStatic
+    def _extract_emotional_matrix(self, req: Request) -> bool:
+        return req.json.get("emotional_matrix", None)
+
     def _extract_input_channel(self, req: Request) -> Text:
         return req.json.get("input_channel") or self.name()
 
@@ -100,6 +104,7 @@ class RestInput(InputChannel):
         async def receive(request: Request) -> HTTPResponse:
             sender_id = await self._extract_sender(request)
             text = self._extract_message(request)
+            emotional_matrix = self._extract_emotional_matrix(request)
             should_use_stream = rasa.utils.endpoints.bool_arg(
                 request, "stream", default=False
             )
@@ -122,6 +127,7 @@ class RestInput(InputChannel):
                             text,
                             collector,
                             sender_id,
+                            emotional_matrix=emotional_matrix,
                             input_channel=input_channel,
                             metadata=metadata,
                         )

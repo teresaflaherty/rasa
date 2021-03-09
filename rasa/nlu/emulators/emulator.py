@@ -22,6 +22,11 @@ class Emulator:
             "text": data["text"][0] if type(data["text"]) == list else data["text"]
         }
 
+        if data.get("matrix"):
+            _data["matrix"] = data["matrix"]
+        else:
+            _data["matrix"] = False
+
         if data.get("model"):
             if type(data["model"]) == list:
                 _data["model"] = data["model"][0]
