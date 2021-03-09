@@ -11,22 +11,45 @@ def determine_bot_emotion(user_message, matrix_on):
         "useQueryString": "True"
     }
 
-    response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
-    user_emotion_scores = response['emotion_scores']
+    # response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
+
+    # Mock data for testing purposes, limited Twinword calls allowed with free subscription
+    response = {
+        "author": "twinword inc.",
+        "email": "help@twinword.com",
+        "emotion_scores": {
+            "anger": 0,
+            "disgust": 0,
+            "fear": 0,
+            "joy": 0.13447999002654,
+            "sadness": 0.022660050917593,
+            "surprise": 0.0087308825457527
+        },
+        "emotions_detected": ["joy"],
+        "result_code": "200",
+        "result_msg": "Success",
+        "version": "7.0.0"
+    }
+
+    user_emotion_scores = {
+        "emotion_scores": response['emotion_scores']
+    }
     if len(response['emotions_detected']) > 0:
         user_emotion = response['emotions_detected'][0]
     else:
         user_emotion = []
 
     if matrix_on:  # If integration with Gabriel's matrix is selected
-        provide_emotions_url = "https://gabeurl.com/emotions"
+        provide_emotions_url = "http://127.0.0.1:5000/emotions"
         provide_emotions_payload = user_emotion_scores
 
         requests.post(provide_emotions_url, data=provide_emotions_payload, headers={})
 
-        retrieve_state_url = "https://gabeurl.com/poll"
+        retrieve_state_url = "http://127.0.0.1:5000/poll"
 
         response = requests.get(retrieve_state_url, data={}, headers={})
+
+        print(response)
 
         bot_emotion_scores = {}
         # Emotion pairs in matrix poll response: [negative, positive]
