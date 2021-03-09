@@ -33,12 +33,14 @@ class TemplatedNaturalLanguageGenerator(NaturalLanguageGenerator):
                 channel_templates.append(template)
             elif template.get("emotion") == bot_emotion:
                 emotional_templates.append(template)
-            elif not template.get("channel") or not template.get("emotion"):
+            elif not template.get("channel") and not template.get("emotion"):
                 default_templates.append(template)
 
         # always prefer channel specific templates over default ones
         if channel_templates:
             return channel_templates
+        elif emotional_templates:
+            return emotional_templates
         else:
             return default_templates
 
@@ -77,9 +79,11 @@ class TemplatedNaturalLanguageGenerator(NaturalLanguageGenerator):
     ) -> Optional[Dict[Text, Any]]:
         """Generate a response for the requested template."""
 
+        bot_emotion = tracker.current_state()["latest_message"]["bot_emotion"][0]
+
         filled_slots = tracker.current_slot_values()
         return self.generate_from_slots(
-            template_name, filled_slots, output_channel, **kwargs
+            template_name, filled_slots, output_channel, bot_emotion, **kwargs
         )
 
     def generate_from_slots(
@@ -87,14 +91,11 @@ class TemplatedNaturalLanguageGenerator(NaturalLanguageGenerator):
         template_name: Text,
         filled_slots: Dict[Text, Any],
         output_channel: Text,
+        bot_emotion: Text,
         **kwargs: Any,
     ) -> Optional[Dict[Text, Any]]:
         """Generate a response for the requested template."""
 
-        if "bot_emotion" in kwargs:
-            bot_emotion = kwargs["bot_emotion"]
-        else:
-            bot_emotion = "default"
 
         # Fetching a random template for the passed template name
         r = copy.deepcopy(self._random_template_for(template_name, bot_emotion, output_channel))
