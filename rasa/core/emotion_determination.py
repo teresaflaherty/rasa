@@ -34,7 +34,7 @@ def determine_bot_emotion(user_message, matrix_on):
     user_emotion_scores = response['emotion_scores']
 
     if len(response['emotions_detected']) > 0:
-        user_emotion = response['emotions_detected'][0]
+        user_emotion = response['emotions_detected']
     else:
         user_emotion = []
 
