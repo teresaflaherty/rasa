@@ -78,8 +78,11 @@ class TemplatedNaturalLanguageGenerator(NaturalLanguageGenerator):
         **kwargs: Any,
     ) -> Optional[Dict[Text, Any]]:
         """Generate a response for the requested template."""
-
-        bot_emotion = tracker.current_state()["latest_message"]["bot_emotion"][0]
+        emotion_list = tracker.current_state()["latest_message"]["bot_emotion"]
+        if len(emotion_list) > 0:
+            bot_emotion = tracker.current_state()["latest_message"]["bot_emotion"][0]
+        else:
+            bot_emotion = "default"
 
         filled_slots = tracker.current_slot_values()
         return self.generate_from_slots(

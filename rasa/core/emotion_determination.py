@@ -12,37 +12,68 @@ def determine_bot_emotion(user_message, matrix_on):
     }
 
     response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
+
+    # # Mock data for testing purposes, limited Twinword calls allowed with free subscription
+    # response = {
+    #     "author": "twinword inc.",
+    #     "email": "help@twinword.com",
+    #     "emotion_scores": {
+    #         "anger": 0.823453423423,
+    #         "disgust": 0,
+    #         "fear": 0,
+    #         "joy": 0.13447999002654,
+    #         "sadness": 0.022660050917593,
+    #         "surprise": 0.0087308825457527
+    #     },
+    #     "emotions_detected": ["anger", "joy"],
+    #     "result_code": "200",
+    #     "result_msg": "Success",
+    #     "version": "7.0.0"
+    # }
+
     user_emotion_scores = response['emotion_scores']
+
     if len(response['emotions_detected']) > 0:
-        user_emotion = response['emotions_detected'][0]
+        user_emotion = response['emotions_detected']
     else:
         user_emotion = []
 
     if matrix_on:  # If integration with Gabriel's matrix is selected
-        provide_emotions_url = "https://gabeurl.com/emotions"
-        provide_emotions_payload = user_emotion_scores
+        provide_emotions_url = "http://127.0.0.1:5000/emotions"
+        provide_emotions_payload = {
+            "emotion_scores": user_emotion_scores
+        }
+        provide_emotions_headers = {
+            "content-type": "application/json"
+        }
 
-        requests.post(provide_emotions_url, data=provide_emotions_payload, headers={})
+        requests.post(provide_emotions_url, json=provide_emotions_payload, headers=provide_emotions_headers)
 
-        retrieve_state_url = "https://gabeurl.com/poll"
+        retrieve_state_url = "http://127.0.0.1:5000/poll"
 
-        response = requests.get(retrieve_state_url, data={}, headers={})
+        response = requests.get(retrieve_state_url, data={}, headers={}).json()
 
         bot_emotion_scores = {}
         # Emotion pairs in matrix poll response: [negative, positive]
         combined_emotions = [['anger', 'fear'], ['sadness', 'joy'], ['disgust', 'surprise']]
         for i in range(3):
-            if response.emotion_in[i] < 0:  # If pair is negative, put abs value for negative emotion and 0 for positive
-                bot_emotion_scores[combined_emotions[i][0]] = abs(response.own_emotion[i])
+            score = float(response["own_emotion"][i])
+            if score < 0.000:  # If pair is negative, put abs value for negative and 0 for positive
+                bot_emotion_scores[combined_emotions[i][0]] = float(abs(score))
                 bot_emotion_scores[combined_emotions[i][1]] = 0
-            elif response.emotion_in[i] > 0:  # If pair is positive, put value for positive emotion and 0 for negative
+            elif score > 0.000:  # If pair is positive, put value for positive and 0 for negative
                 bot_emotion_scores[combined_emotions[i][0]] = 0
-                bot_emotion_scores[combined_emotions[i][1]] = response.own_emotion[i]
+                bot_emotion_scores[combined_emotions[i][1]] = float(score)
             else:  # If paired score is 0, put 0 for both emotions
                 bot_emotion_scores[combined_emotions[i][0]] = 0
                 bot_emotion_scores[combined_emotions[i][1]] = 0
 
-        bot_emotion = sorted(bot_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
+        bot_emotion_scored = sorted(bot_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
+
+        if float(bot_emotion_scored[1]) > 0:
+            bot_emotion = [bot_emotion_scored[0]]
+        else:
+            bot_emotion = []
 
     else:  # If integration with Gabriel's matrix is not selected, uses input emotion as output emotion
         bot_emotion = user_emotion
