@@ -534,7 +534,7 @@ class MessageProcessor:
             text = self.message_preprocessor(message.text)
         else:
             text = message.text
-
+        logging.info(f"User message: {text}")
         # process bot and user emotions
         user_emotion, bot_emotion = determine_bot_emotion(text, message.emotional_matrix)
 
