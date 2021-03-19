@@ -1,4 +1,5 @@
 import requests
+import logging
 
 
 def determine_bot_emotion(user_message, matrix_on):
@@ -10,31 +11,45 @@ def determine_bot_emotion(user_message, matrix_on):
         "x-rapidapi-host": "twinword-emotion-analysis-v1.p.rapidapi.com",
         "useQueryString": "True"
     }
+    try:
+        response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
+        user_emotion_scores = response['emotion_scores']
+        emotions_detected = response['emotions_detected']
 
-    response = requests.post(twinword_url, data=twinword_payload, headers=twinword_headers).json()
+        # # Mock data for testing purposes, limited Twinword calls allowed with free subscription
+        # response = {
+        #     "author": "twinword inc.",
+        #     "email": "help@twinword.com",
+        #     "emotion_scores": {
+        #         "anger": 0.823453423423,
+        #         "disgust": 0,
+        #         "fear": 0,
+        #         "joy": 0.13447999002654,
+        #         "sadness": 0.022660050917593,
+        #         "surprise": 0.0087308825457527
+        #     },
+        #     "emotions_detected": ["anger", "joy"],
+        #     "result_code": "200",
+        #     "result_msg": "Success",
+        #     "version": "7.0.0"
+        # }
 
-    # # Mock data for testing purposes, limited Twinword calls allowed with free subscription
-    # response = {
-    #     "author": "twinword inc.",
-    #     "email": "help@twinword.com",
-    #     "emotion_scores": {
-    #         "anger": 0.823453423423,
-    #         "disgust": 0,
-    #         "fear": 0,
-    #         "joy": 0.13447999002654,
-    #         "sadness": 0.022660050917593,
-    #         "surprise": 0.0087308825457527
-    #     },
-    #     "emotions_detected": ["anger", "joy"],
-    #     "result_code": "200",
-    #     "result_msg": "Success",
-    #     "version": "7.0.0"
-    # }
+    except():
+        logging.exception('Twinword API currently unreachable.')
+        user_emotion_scores = {
+            "anger": 0,
+            "disgust": 0,
+            "fear": 0,
+            "joy": 0,
+            "sadness": 0,
+            "surprise": 0
+        }
+        emotions_detected = []
 
-    user_emotion_scores = response['emotion_scores']
+    logging.info(f"Twinword analysis results: {user_emotion_scores}")
 
-    if len(response['emotions_detected']) > 0:
-        user_emotion = response['emotions_detected']
+    if len(emotions_detected) > 0:
+        user_emotion = [emotions_detected[0]]
     else:
         user_emotion = []
 
@@ -68,6 +83,8 @@ def determine_bot_emotion(user_message, matrix_on):
                 bot_emotion_scores[combined_emotions[i][0]] = 0
                 bot_emotion_scores[combined_emotions[i][1]] = 0
 
+        logging.info(f"Bot emotional scores from Gabriel: {bot_emotion_scores}")
+
         bot_emotion_scored = sorted(bot_emotion_scores.items(), key=lambda x: x[1], reverse=True)[0]
 
         if float(bot_emotion_scored[1]) > 0:
@@ -78,4 +95,5 @@ def determine_bot_emotion(user_message, matrix_on):
     else:  # If integration with Gabriel's matrix is not selected, uses input emotion as output emotion
         bot_emotion = user_emotion
 
+    logging.info(f"Determined Bot Emotion: {bot_emotion}")
     return user_emotion, bot_emotion
